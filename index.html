@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel辅助器</title>
+    <!-- 引入SheetJS库 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .module-config {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .module-config h2 {
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 18px;
+        }
+
+        .module-list {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-item input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 120px;
+        }
+
+        .add-module, .remove-module {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .add-module {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .add-module:hover {
+            background-color: #45a049;
+        }
+
+        .remove-module {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .remove-module:hover {
+            background-color: #da190b;
+        }
+
+        .data-section {
+            margin-bottom: 30px;
+        }
+
+        .data-section h2 {
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        td input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .add-row, .export-excel {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .add-row {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .add-row:hover {
+            background-color: #0b7dda;
+        }
+
+        .export-excel {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .export-excel:hover {
+            background-color: #e68900;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .module-list {
+                flex-direction: column;
+            }
+
+            .module-item input {
+                width: 150px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .add-row, .export-excel {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Excel辅助器</h1>
+        
+        <!-- 模块配置 -->
+        <div class="module-config">
+            <h2>模块配置</h2>
+            <div class="module-list" id="moduleList">
+                <div class="module-item">
+                    <input type="text" value="学生" placeholder="模块名称">
+                    <button class="remove-module">删除</button>
+                </div>
+                <div class="module-item">
+                    <input type="text" value="学号" placeholder="模块名称">
+                    <button class="remove-module">删除</button>
+                </div>
+                <div class="module-item">
+                    <input type="text" value="成绩" placeholder="模块名称">
+                    <button class="remove-module">删除</button>
+                </div>
+            </div>
+            <button class="add-module">添加模块</button>
+        </div>
+
+        <!-- 数据录入 -->
+        <div class="data-section">
+            <h2>数据录入</h2>
+            <table id="dataTable">
+                <thead id="tableHeader">
+                    <tr>
+                        <th>学生</th>
+                        <th>学号</th>
+                        <th>成绩</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td><input type="text" placeholder="请输入"></td>
+                        <td><input type="text" placeholder="请输入"></td>
+                        <td><input type="text" placeholder="请输入"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="add-row">添加行</button>
+            <button class="export-excel">导出Excel</button>
+        </div>
+    </div>
+
+    <script>
+        // 模块管理
+        const moduleList = document.getElementById('moduleList');
+        const addModuleBtn = document.querySelector('.add-module');
+        const tableHeader = document.getElementById('tableHeader');
+        const tableBody = document.getElementById('tableBody');
+        const addRowBtn = document.querySelector('.add-row');
+        const exportBtn = document.querySelector('.export-excel');
+
+        // 添加模块
+        addModuleBtn.addEventListener('click', () => {
+            const moduleItem = document.createElement('div');
+            moduleItem.className = 'module-item';
+            moduleItem.innerHTML = `
+                <input type="text" placeholder="模块名称">
+                <button class="remove-module">删除</button>
+            `;
+            moduleList.appendChild(moduleItem);
+            updateTableHeaders();
+            updateAllRows();
+            
+            // 添加删除事件
+            moduleItem.querySelector('.remove-module').addEventListener('click', () => {
+                moduleItem.remove();
+                updateTableHeaders();
+                updateAllRows();
+            });
+        });
+
+        // 删除模块事件
+        document.querySelectorAll('.remove-module').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.parentElement.remove();
+                updateTableHeaders();
+                updateAllRows();
+            });
+        });
+
+        // 模块名称变化事件
+        moduleList.addEventListener('input', (e) => {
+            if (e.target.tagName === 'INPUT') {
+                updateTableHeaders();
+            }
+        });
+
+        // 更新表头
+        function updateTableHeaders() {
+            const modules = document.querySelectorAll('.module-item input');
+            const headerRow = tableHeader.querySelector('tr');
+            headerRow.innerHTML = '';
+            
+            modules.forEach(input => {
+                const th = document.createElement('th');
+                th.textContent = input.value || '未命名';
+                headerRow.appendChild(th);
+            });
+        }
+
+        // 添加行
+        addRowBtn.addEventListener('click', () => {
+            const row = document.createElement('tr');
+            const modules = document.querySelectorAll('.module-item input');
+            
+            modules.forEach(() => {
+                const td = document.createElement('td');
+                td.innerHTML = '<input type="text" placeholder="请输入">';
+                row.appendChild(td);
+            });
+            
+            tableBody.appendChild(row);
+        });
+
+        // 更新所有行
+        function updateAllRows() {
+            const rows = tableBody.querySelectorAll('tr');
+            const modules = document.querySelectorAll('.module-item input');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const cellCount = cells.length;
+                const moduleCount = modules.length;
+                
+                if (cellCount < moduleCount) {
+                    // 添加新列
+                    for (let i = cellCount; i < moduleCount; i++) {
+                        const td = document.createElement('td');
+                        td.innerHTML = '<input type="text" placeholder="请输入">';
+                        row.appendChild(td);
+                    }
+                } else if (cellCount > moduleCount) {
+                    // 删除多余列
+                    for (let i = cellCount - 1; i >= moduleCount; i--) {
+                        cells[i].remove();
+                    }
+                }
+            });
+        }
+
+        // Excel导出功能 - 使用SheetJS直接生成Excel文件
+        exportBtn.addEventListener('click', () => {
+            const modules = document.querySelectorAll('.module-item input');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            const wsData = [];
+            
+            // 添加表头
+            const headers = Array.from(modules).map(input => input.value || '未命名');
+            wsData.push(headers);
+            
+            // 添加数据行
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const rowData = Array.from(inputs).map(input => input.value);
+                wsData.push(rowData);
+            });
+            
+            // 创建工作表
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // 设置列宽为自适应（近似值）
+            const colWidths = headers.map(() => ({ wch: 15 }));
+            ws['!cols'] = colWidths;
+            
+            // 将工作表添加到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, '数据');
+            
+            // 导出Excel文件
+            XLSX.writeFile(wb, 'excel辅助器_导出数据.xlsx');
+        });
+    </script>
+</body>
+</html>
